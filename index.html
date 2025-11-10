@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validador de Planificaciones - Ciencias Naturales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen">
+    <div class="p-6">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+                <h1 class="text-3xl font-bold text-blue-900 mb-2">
+                    Validador de Planificaciones
+                </h1>
+                <p class="text-gray-600">
+                    Sistema de verificación automática para planificaciones de Ciencias Naturales
+                </p>
+            </div>
+
+            <!-- Área de carga -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                    Subir Planificación
+                </h2>
+                
+                <div class="border-2 border-dashed border-blue-300 rounded-lg p-12 text-center hover:border-blue-500 transition-colors">
+                    <svg class="w-16 h-16 text-blue-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <p class="text-gray-700 mb-4">
+                        Seleccione su documento de planificación
+                    </p>
+                    <label class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors">
+                        Seleccionar Archivo
+                        <input type="file" id="fileInput" accept=".pdf,.doc,.docx" class="hidden">
+                    </label>
+                    <p class="text-sm text-gray-500 mt-3">
+                        Formatos aceptados: PDF, Word (.doc, .docx)
+                    </p>
+                </div>
+
+                <div id="archivoNombre" class="mt-4 hidden">
+                    <div class="flex items-center gap-3 text-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="font-medium" id="nombreArchivo"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Procesando -->
+            <div id="procesando" class="bg-white rounded-lg shadow-lg p-8 text-center hidden">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p class="text-gray-700 font-medium">
+                    Analizando su planificación...
+                </p>
+                <p class="text-sm text-gray-500 mt-2">
+                    Verificando objetivos, estrategias, contenidos y evaluación
+                </p>
+            </div>
+
+            <!-- Resultados -->
+            <div id="resultado" class="hidden rounded-lg shadow-lg p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <svg id="iconoResultado" class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <h3 id="mensajeResultado" class="text-2xl font-bold"></h3>
+                        <div class="flex items-center gap-2 mt-2">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                            </svg>
+                            <span class="text-xl font-semibold text-gray-700">
+                                Puntaje: <span id="puntaje"></span>/100
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalles -->
+                <div class="bg-white rounded-lg p-6 mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-3">
+                        Elementos evaluados:
+                    </h4>
+                    <ul id="detalles" class="space-y-2"></ul>
+                </div>
+
+                <!-- Recomendaciones -->
+                <div id="recomendaciones" class="bg-white rounded-lg p-6 hidden">
+                    <h4 class="font-semibold text-gray-800 mb-3">
+                        Recomendaciones para mejorar:
+                    </h4>
+                    <ul id="listaRecomendaciones" class="space-y-2"></ul>
+                </div>
+
+                <!-- Botón para nuevo documento -->
+                <button id="nuevoDocumento" class="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    Validar Otra Planificación
+                </button>
+            </div>
+
+            <!-- Información adicional -->
+            <div id="infoAdicional" class="bg-white rounded-lg shadow-lg p-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                    ¿Qué se evalúa en su planificación?
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h4 class="font-semibold text-gray-700 mb-2">
+                            Objetivos de Aprendizaje
+                        </h4>
+                        <p class="text-sm text-gray-600">
+                            Verificamos que estén claros, medibles y alineados al currículo nacional
+                        </p>
+                    </div>
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h4 class="font-semibold text-gray-700 mb-2">
+                            Estrategias Metodológicas
+                        </h4>
+                        <p class="text-sm text-gray-600">
+                            Confirmamos el uso de metodologías activas y experimentación
+                        </p>
+                    </div>
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h4 class="font-semibold text-gray-700 mb-2">
+                            Contenidos Curriculares
+                        </h4>
+                        <p class="text-sm text-gray-600">
+                            Revisamos la coherencia con el programa de estudios
+                        </p>
+                    </div>
+                    <div class="border-l-4 border-orange-500 pl-4">
+                        <h4 class="font-semibold text-gray-700 mb-2">
+                            Sistema de Evaluación
+                        </h4>
+                        <p class="text-sm text-gray-600">
+                            Verificamos instrumentos de evaluación formativa y sumativa
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const archivoNombre = document.getElementById('archivoNombre');
+        const nombreArchivo = document.getElementById('nombreArchivo');
+        const procesando = document.getElementById('procesando');
+        const resultado = document.getElementById('resultado');
+        const infoAdicional = document.getElementById('infoAdicional');
+        const nuevoDocumento = document.getElementById('nuevoDocumento');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                nombreArchivo.textContent = file.name;
+                archivoNombre.classList.remove('hidden');
+                validarPlanificacion(file);
+            }
+        });
+
+        nuevoDocumento.addEventListener('click', function() {
+            fileInput.value = '';
+            archivoNombre.classList.add('hidden');
+            resultado.classList.add('hidden');
+            infoAdicional.classList.remove('hidden');
+        });
+
+        async function validarPlanificacion(file) {
+            // Ocultar info adicional
+            infoAdicional.classList.add('hidden');
+            resultado.classList.add('hidden');
+            
+            // Mostrar procesando
+            procesando.classList.remove('hidden');
+            
+            // Simular análisis
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Ocultar procesando
+            procesando.classList.add('hidden');
+            
+            // Generar resultado aleatorio
+            const aleatorio = Math.random();
+            
+            if (aleatorio > 0.4) {
+                mostrarAprobado();
+            } else {
+                mostrarMejoras();
+            }
+            
+            resultado.classList.remove('hidden');
+        }
+
+        function mostrarAprobado() {
+            resultado.className = 'rounded-lg shadow-lg p-8 bg-green-50 border-2 border-green-300';
+            
+            const icono = document.getElementById('iconoResultado');
+            icono.className = 'w-16 h-16 text-green-600';
+            
+            document.getElementById('mensajeResultado').textContent = '¡Excelente! Su planificación cumple con todos los requisitos';
+            document.getElementById('mensajeResultado').className = 'text-2xl font-bold text-green-900';
+            
+            document.getElementById('puntaje').textContent = '95';
+            
+            const detalles = [
+                '✓ Objetivos de aprendizaje claramente definidos',
+                '✓ Estrategias metodológicas apropiadas',
+                '✓ Contenidos alineados al currículo',
+                '✓ Evaluación formativa y sumativa incluida',
+                '✓ Recursos del laboratorio virtual especificados'
+            ];
+            
+            mostrarDetalles(detalles);
+            document.getElementById('recomendaciones').classList.add('hidden');
+        }
+
+        function mostrarMejoras() {
+            resultado.className = 'rounded-lg shadow-lg p-8 bg-yellow-50 border-2 border-yellow-300';
+            
+            const icono = document.getElementById('iconoResultado');
+            icono.className = 'w-16 h-16 text-yellow-600';
+            icono.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>';
+            
+            document.getElementById('mensajeResultado').textContent = 'Su planificación necesita mejoras';
+            document.getElementById('mensajeResultado').className = 'text-2xl font-bold text-yellow-900';
+            
+            const puntaje = Math.floor(Math.random() * 30) + 50;
+            document.getElementById('puntaje').textContent = puntaje;
+            
+            const detalles = [
+                '✓ Objetivos de aprendizaje presentes',
+                '✗ Falta especificar estrategias metodológicas',
+                '✓ Contenidos incluidos',
+                '✗ Evaluación incompleta (falta rúbrica)',
+                '✗ No se mencionan recursos del laboratorio virtual'
+            ];
+            
+            const recomendaciones = [
+                'Agregue estrategias específicas como: experimentación, indagación guiada, aprendizaje colaborativo',
+                'Incluya instrumentos de evaluación (rúbricas, listas de cotejo)',
+                'Especifique qué simulaciones del laboratorio virtual utilizará'
+            ];
+            
+            mostrarDetalles(detalles);
+            mostrarRecomendaciones(recomendaciones);
+        }
+
+        function mostrarDetalles(detalles) {
+            const lista = document.getElementById('detalles');
+            lista.innerHTML = '';
+            detalles.forEach(detalle => {
+                const li = document.createElement('li');
+                li.className = 'text-gray-700';
+                li.textContent = detalle;
+                lista.appendChild(li);
+            });
+        }
+
+        function mostrarRecomendaciones(recomendaciones) {
+            const contenedor = document.getElementById('recomendaciones');
+            const lista = document.getElementById('listaRecomendaciones');
+            lista.innerHTML = '';
+            
+            recomendaciones.forEach(rec => {
+                const li = document.createElement('li');
+                li.className = 'text-gray-700 flex gap-2';
+                li.innerHTML = `<span class="text-yellow-600 font-bold">→</span><span>${rec}</span>`;
+                lista.appendChild(li);
+            });
+            
+            contenedor.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
