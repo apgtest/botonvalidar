@@ -5,284 +5,931 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validador de Planificaciones - Ciencias Naturales</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <style>
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        html { scroll-behavior: smooth; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen">
-    <div class="p-6">
-        <div class="max-w-4xl mx-auto">
-            <!-- Header -->
-            <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
-                <h1 class="text-3xl font-bold text-blue-900 mb-2">
-                    Validador de Planificaciones
-                </h1>
-                <p class="text-gray-600">
-                    Sistema de verificación automática para planificaciones de Ciencias Naturales
-                </p>
+<body class="bg-gradient-to-br from-blue-50 via-green-50 to-blue-50 min-h-screen">
+    
+    <div class="p-4 md:p-6">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- ========== ENCABEZADO ========== -->
+            <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 mb-6">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="bg-gradient-to-br from-green-500 to-blue-500 p-4 rounded-xl">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
+                            Validador de Planificaciones
+                        </h1>
+                        <p class="text-gray-600 text-sm md:text-base mt-1">
+                            Sistema de validación automática para Ciencias Naturales
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                    <p class="text-sm text-green-800">
+                        <strong>✅ 100% Gratuito:</strong> Validación automática basada en 10 criterios obligatorios según estándares pedagógicos
+                    </p>
+                </div>
             </div>
 
-            <!-- Área de carga -->
-            <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">
-                    Subir Planificación
-                </h2>
-                
-                <div class="border-2 border-dashed border-blue-300 rounded-lg p-12 text-center hover:border-blue-500 transition-colors">
-                    <svg class="w-16 h-16 text-blue-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- ========== ÁREA DE CARGA ========== -->
+            <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                     </svg>
-                    <p class="text-gray-700 mb-4">
-                        Seleccione su documento de planificación
+                    Subir Planificación para Validar
+                </h2>
+                
+                <div id="dropZone" class="border-3 border-dashed border-green-300 rounded-xl p-12 text-center hover:border-green-500 hover:bg-green-50 transition-all cursor-pointer">
+                    <svg class="w-20 h-20 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <p class="text-gray-700 text-lg mb-4 font-medium">
+                        Arrastra tu planificación aquí o haz clic para seleccionar
                     </p>
-                    <label class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors">
-                        Seleccionar Archivo
+                    <label class="inline-block bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-xl cursor-pointer hover:from-green-700 hover:to-blue-700 transition-all shadow-lg font-semibold">
+                        📁 Seleccionar Archivo
                         <input type="file" id="fileInput" accept=".pdf,.doc,.docx" class="hidden">
                     </label>
-                    <p class="text-sm text-gray-500 mt-3">
-                        Formatos aceptados: PDF, Word (.doc, .docx)
+                    <p class="text-sm text-gray-500 mt-4">
+                        ✅ Formatos: PDF, Word (.doc, .docx) • Máximo 10MB
                     </p>
                 </div>
 
-                <div id="archivoNombre" class="mt-4 hidden">
-                    <div class="flex items-center gap-3 text-gray-700">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div id="archivoNombre" class="mt-6 hidden">
+                    <div class="flex items-center gap-3 bg-green-50 border border-green-200 p-4 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                        <span class="font-medium" id="nombreArchivo"></span>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-600">Archivo cargado:</p>
+                            <p class="font-semibold text-gray-800" id="nombreArchivo"></p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Procesando -->
-            <div id="procesando" class="bg-white rounded-lg shadow-lg p-8 text-center hidden">
-                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p class="text-gray-700 font-medium">
-                    Analizando su planificación...
+            <!-- ========== PROCESANDO ========== -->
+            <div id="procesando" class="bg-white rounded-xl shadow-2xl p-12 text-center hidden">
+                <div class="relative mx-auto mb-6" style="width: 80px; height: 80px;">
+                    <div class="absolute top-0 left-0 w-full h-full border-8 border-green-200 rounded-full"></div>
+                    <div class="absolute top-0 left-0 w-full h-full border-8 border-green-600 rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <p class="text-gray-800 font-bold text-xl mb-3">
+                    🔍 Analizando su planificación...
                 </p>
-                <p class="text-sm text-gray-500 mt-2">
-                    Verificando objetivos, estrategias, contenidos y evaluación
-                </p>
+                <p class="text-gray-600 mb-4">Validando los 10 criterios obligatorios</p>
+                <div class="max-w-md mx-auto text-left space-y-2 text-sm">
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <span class="animate-pulse">⏳</span> Extrayendo contenido del documento
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <span class="animate-pulse">⏳</span> Validando datos generales
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <span class="animate-pulse">⏳</span> Verificando objetivos y competencias
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <span class="animate-pulse">⏳</span> Analizando estrategias PHET
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <span class="animate-pulse">⏳</span> Revisando evaluación y recursos
+                    </div>
+                </div>
             </div>
 
-            <!-- Resultados -->
-            <div id="resultado" class="hidden rounded-lg shadow-lg p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <svg id="iconoResultado" class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- ========== RESULTADOS ========== -->
+            <div id="resultado" class="hidden rounded-xl shadow-2xl p-6 md:p-8">
+                <div class="flex flex-col md:flex-row items-center gap-6 mb-8">
+                    <svg id="iconoResultado" class="w-24 h-24 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <div>
-                        <h3 id="mensajeResultado" class="text-2xl font-bold"></h3>
-                        <div class="flex items-center gap-2 mt-2">
-                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                    <div class="flex-1 text-center md:text-left">
+                        <h3 id="mensajeResultado" class="text-3xl font-bold mb-3"></h3>
+                        <div class="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-xl shadow-md">
+                            <svg class="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                             </svg>
-                            <span class="text-xl font-semibold text-gray-700">
-                                Puntaje: <span id="puntaje"></span>/100
-                            </span>
+                            <div>
+                                <p class="text-sm text-gray-600">Puntaje Total</p>
+                                <p class="text-3xl font-bold text-gray-800">
+                                    <span id="puntaje"></span><span class="text-xl text-gray-500">/10</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span id="nivelBadge" class="inline-block px-4 py-2 rounded-full text-sm font-semibold"></span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Detalles -->
-                <div class="bg-white rounded-lg p-6 mb-4">
-                    <h4 class="font-semibold text-gray-800 mb-3">
-                        Elementos evaluados:
+                <div class="bg-white rounded-xl p-6 mb-6 border-l-4" id="interpretacionBox">
+                    <h4 class="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        Interpretación del Resultado
                     </h4>
-                    <ul id="detalles" class="space-y-2"></ul>
+                    <p id="interpretacion" class="text-gray-700"></p>
                 </div>
 
-                <!-- Recomendaciones -->
-                <div id="recomendaciones" class="bg-white rounded-lg p-6 hidden">
-                    <h4 class="font-semibold text-gray-800 mb-3">
-                        Recomendaciones para mejorar:
+                <div class="bg-white rounded-xl p-6 mb-6">
+                    <h4 class="font-bold text-gray-800 mb-4 text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        Evaluación Detallada por Criterios
                     </h4>
-                    <ul id="listaRecomendaciones" class="space-y-2"></ul>
+                    <div id="detalles" class="space-y-3"></div>
                 </div>
 
-                <!-- Botón para nuevo documento -->
-                <button id="nuevoDocumento" class="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <div id="recomendaciones" class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border-l-4 border-yellow-500">
+                    <h4 class="font-bold text-gray-800 mb-4 text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        Recomendaciones para Mejorar
+                    </h4>
+                    <ul id="listaRecomendaciones" class="space-y-3"></ul>
+                </div>
+
+                <button onclick="reiniciar()" class="mt-8 w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-xl hover:from-green-700 hover:to-blue-700 transition-all font-semibold shadow-lg flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
                     Validar Otra Planificación
                 </button>
             </div>
 
-            <!-- Información adicional -->
-            <div id="infoAdicional" class="bg-white rounded-lg shadow-lg p-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                    ¿Qué se evalúa en su planificación?
+            <!-- ========== INFORMACIÓN ADICIONAL ========== -->
+            <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 mt-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    ¿Cómo funciona el validador?
                 </h3>
                 <div class="grid md:grid-cols-2 gap-4">
-                    <div class="border-l-4 border-blue-500 pl-4">
-                        <h4 class="font-semibold text-gray-700 mb-2">
-                            Objetivos de Aprendizaje
-                        </h4>
-                        <p class="text-sm text-gray-600">
-                            Verificamos que estén claros, medibles y alineados al currículo nacional
-                        </p>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-blue-900 mb-2">📋 10 Criterios Obligatorios</h4>
+                        <p class="text-sm text-blue-800">El sistema evalúa cada uno de los 10 elementos requeridos en una planificación de Ciencias Naturales</p>
                     </div>
-                    <div class="border-l-4 border-green-500 pl-4">
-                        <h4 class="font-semibold text-gray-700 mb-2">
-                            Estrategias Metodológicas
-                        </h4>
-                        <p class="text-sm text-gray-600">
-                            Confirmamos el uso de metodologías activas y experimentación
-                        </p>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-green-900 mb-2">🎯 Análisis Específico</h4>
+                        <p class="text-sm text-green-800">Busca elementos específicos como objetivos en infinitivo, menciones de PHET, instrumentos de evaluación, etc.</p>
                     </div>
-                    <div class="border-l-4 border-purple-500 pl-4">
-                        <h4 class="font-semibold text-gray-700 mb-2">
-                            Contenidos Curriculares
-                        </h4>
-                        <p class="text-sm text-gray-600">
-                            Revisamos la coherencia con el programa de estudios
-                        </p>
+                    <div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-purple-900 mb-2">📊 Puntaje sobre 10</h4>
+                        <p class="text-sm text-purple-800">Cada criterio cumplido suma 1 punto. El total determina el nivel de su planificación.</p>
                     </div>
-                    <div class="border-l-4 border-orange-500 pl-4">
-                        <h4 class="font-semibold text-gray-700 mb-2">
-                            Sistema de Evaluación
-                        </h4>
-                        <p class="text-sm text-gray-600">
-                            Verificamos instrumentos de evaluación formativa y sumativa
-                        </p>
+                    <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-orange-900 mb-2">💡 Recomendaciones</h4>
+                        <p class="text-sm text-orange-800">Recibe sugerencias específicas para completar o mejorar los criterios faltantes.</p>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
     <script>
-        const fileInput = document.getElementById('fileInput');
-        const archivoNombre = document.getElementById('archivoNombre');
-        const nombreArchivo = document.getElementById('nombreArchivo');
-        const procesando = document.getElementById('procesando');
-        const resultado = document.getElementById('resultado');
-        const infoAdicional = document.getElementById('infoAdicional');
-        const nuevoDocumento = document.getElementById('nuevoDocumento');
+        /*
+         * =====================================================================
+         * VALIDADOR DE PLANIFICACIONES DE CIENCIAS NATURALES CON PHET
+         * Sistema de validación automática sin IA (100% gratuito)
+         * =====================================================================
+         * 
+         * FUNCIONAMIENTO GENERAL:
+         * 1. Extrae el texto completo del documento (PDF o Word)
+         * 2. Analiza el texto buscando patrones específicos para cada criterio
+         * 3. Asigna un puntaje de 0-10 según criterios cumplidos
+         * 4. Genera recomendaciones personalizadas
+         * =====================================================================
+         */
 
+        // ========== VARIABLES GLOBALES ==========
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+
+        // ========== DEFINICIÓN DE CRITERIOS Y PATRONES DE BÚSQUEDA ==========
+        /*
+         * Cada criterio tiene:
+         * - nombre: Descripción del criterio
+         * - patrones: Arrays de términos que deben estar presentes
+         * - validacion: Función personalizada para validar el criterio
+         * - minimo: Cantidad mínima de patrones que deben encontrarse
+         */
+        
+        const CRITERIOS = {
+            1: {
+                nombre: 'Datos generales',
+                descripcion: 'Incluye institución, área, grado, fecha, docente y nombre de la unidad o tema',
+                // Patrones divididos por categorías para validación más precisa
+                patrones: {
+                    institucion: ['institución', 'colegio', 'escuela', 'unidad educativa', 'centro educativo'],
+                    area: ['área:', 'asignatura:', 'ciencias naturales', 'c.c.n.n'],
+                    grado: ['grado:', 'curso:', 'año:', 'nivel:', '°', 'octavo', 'noveno', 'décimo'],
+                    fecha: ['fecha:', '/', '202', '2025', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio'],
+                    docente: ['docente:', 'profesor:', 'maestro:', 'facilitador:', 'nombre:'],
+                    tema: ['tema:', 'unidad:', 'contenido:', 'energía', 'materia', 'átomo']
+                },
+                minimo: 4, // Deben cumplirse al menos 4 de las 6 subcategorías
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let cumplidos = 0;
+                    const detalles = [];
+                    
+                    // Validar cada subcategoría
+                    for (const [categoria, terminos] of Object.entries(this.patrones)) {
+                        const encontrado = terminos.some(term => textoLower.includes(term.toLowerCase()));
+                        if (encontrado) {
+                            cumplidos++;
+                            detalles.push(`✓ ${categoria}`);
+                        } else {
+                            detalles.push(`✗ ${categoria}`);
+                        }
+                    }
+                    
+                    return {
+                        cumple: cumplidos >= this.minimo,
+                        puntaje: cumplidos,
+                        detalles: detalles.join(', ')
+                    };
+                }
+            },
+            
+            2: {
+                nombre: 'Objetivos de aprendizaje',
+                descripcion: 'Redactados con verbos en infinitivo, son medibles y coherentes con el currículo',
+                // Verbos en infinitivo típicos de objetivos de aprendizaje
+                verbosInfinitivo: [
+                    'identificar', 'reconocer', 'describir', 'explicar', 'analizar',
+                    'comparar', 'contrastar', 'sintetizar', 'evaluar', 'aplicar',
+                    'comprender', 'demostrar', 'interpretar', 'relacionar', 'determinar'
+                ],
+                indicadores: ['objetivo', 'lograr', 'alcanzar', 'pretende', 'se espera'],
+                minimo: 2,
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let verbosEncontrados = 0;
+                    let tieneIndicador = false;
+                    
+                    // Buscar verbos en infinitivo
+                    this.verbosInfinitivo.forEach(verbo => {
+                        if (textoLower.includes(verbo)) verbosEncontrados++;
+                    });
+                    
+                    // Buscar indicadores de objetivos
+                    tieneIndicador = this.indicadores.some(ind => textoLower.includes(ind));
+                    
+                    const cumple = verbosEncontrados >= this.minimo && tieneIndicador;
+                    
+                    return {
+                        cumple: cumple,
+                        puntaje: verbosEncontrados,
+                        detalles: `Verbos encontrados: ${verbosEncontrados}, Indicador: ${tieneIndicador ? 'Sí' : 'No'}`
+                    };
+                }
+            },
+            
+            3: {
+                nombre: 'Competencia o destreza del currículo',
+                descripcion: 'Se evidencia la relación con las destrezas o criterios de evaluación del área de Ciencias Naturales',
+                patrones: [
+                    'competencia', 'destreza', 'criterio de evaluación', 'indicador de logro',
+                    'c.n.', 'e.cn', 'cn.5', 'currículo', 'estándar', 'objetivo de área'
+                ],
+                minimo: 2,
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let coincidencias = 0;
+                    
+                    this.patrones.forEach(patron => {
+                        if (textoLower.includes(patron.toLowerCase())) coincidencias++;
+                    });
+                    
+                    return {
+                        cumple: coincidencias >= this.minimo,
+                        puntaje: coincidencias,
+                        detalles: `Referencias encontradas: ${coincidencias}`
+                    };
+                }
+            },
+            
+            4: {
+                nombre: 'Estrategias metodológicas',
+                descripcion: 'Describe estrategias activas o experimentales que incluyan el uso del programa PHET',
+                // ESTE ES EL CRITERIO MÁS IMPORTANTE: uso de PHET
+                patronesPHET: ['phet', 'ph.e.t', 'simulación', 'laboratorio virtual', 'simulador'],
+                estrategias: [
+                    'aprendizaje activo', 'indagación', 'experimentación', 'método científico',
+                    'trabajo colaborativo', 'aprendizaje basado', 'observación', 'manipulación'
+                ],
+                minimo: 2, // Debe mencionar PHET + al menos una estrategia
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let tienePHET = false;
+                    let estrategiasEncontradas = 0;
+                    
+                    // Verificar mención de PHET (CRÍTICO)
+                    tienePHET = this.patronesPHET.some(patron => textoLower.includes(patron.toLowerCase()));
+                    
+                    // Contar estrategias metodológicas
+                    this.estrategias.forEach(estrategia => {
+                        if (textoLower.includes(estrategia.toLowerCase())) estrategiasEncontradas++;
+                    });
+                    
+                    const cumple = tienePHET && estrategiasEncontradas >= 1;
+                    
+                    return {
+                        cumple: cumple,
+                        puntaje: (tienePHET ? 1 : 0) + estrategiasEncontradas,
+                        detalles: `PHET: ${tienePHET ? 'Sí' : 'No'}, Estrategias: ${estrategiasEncontradas}`
+                    };
+                }
+            },
+            
+            5: {
+                nombre: 'Secuencia didáctica',
+                descripcion: 'Se detalla el inicio, desarrollo y cierre de la clase con tiempos aproximados',
+                fases: {
+                    inicio: ['inicio', 'anticipación', 'motivación', 'saberes previos', 'activación'],
+                    desarrollo: ['desarrollo', 'construcción', 'elaboración', 'actividad', 'trabajo'],
+                    cierre: ['cierre', 'consolidación', 'conclusión', 'síntesis', 'evaluación']
+                },
+                tiempos: ['minutos', 'min', 'hora', 'tiempo', 'duración', '10', '15', '20', '30'],
+                minimo: 3, // Deben estar las 3 fases
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let fasesEncontradas = 0;
+                    let tieneTiempos = false;
+                    const detalles = [];
+                    
+                    // Verificar cada fase
+                    for (const [fase, terminos] of Object.entries(this.fases)) {
+                        const encontrado = terminos.some(term => textoLower.includes(term));
+                        if (encontrado) {
+                            fasesEncontradas++;
+                            detalles.push(`✓ ${fase}`);
+                        } else {
+                            detalles.push(`✗ ${fase}`);
+                        }
+                    }
+                    
+                    // Verificar mención de tiempos
+                    tieneTiempos = this.tiempos.some(tiempo => textoLower.includes(tiempo));
+                    
+                    return {
+                        cumple: fasesEncontradas === 3 && tieneTiempos,
+                        puntaje: fasesEncontradas,
+                        detalles: `${detalles.join(', ')}, Tiempos: ${tieneTiempos ? 'Sí' : 'No'}`
+                    };
+                }
+            },
+            
+            6: {
+                nombre: 'Recursos y materiales',
+                descripcion: 'Se incluyen los recursos digitales (PHET), materiales físicos, fichas o guías de trabajo',
+                digital: ['phet', 'computador', 'ordenador', 'internet', 'proyector', 'simulación', 'digital'],
+                fisico: ['material', 'recurso', 'guía', 'ficha', 'hoja', 'cuaderno', 'laboratorio'],
+                minimo: 3,
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let digitalEncontrados = 0;
+                    let fisicoEncontrados = 0;
+                    
+                    this.digital.forEach(item => {
+                        if (textoLower.includes(item)) digitalEncontrados++;
+                    });
+                    
+                    this.fisico.forEach(item => {
+                        if (textoLower.includes(item)) fisicoEncontrados++;
+                    });
+                    
+                    const totalRecursos = digitalEncontrados + fisicoEncontrados;
+                    const tienePHET = textoLower.includes('phet');
+                    
+                    return {
+                        cumple: totalRecursos >= this.minimo && tienePHET,
+                        puntaje: totalRecursos,
+                        detalles: `Digitales: ${digitalEncontrados}, Físicos: ${fisicoEncontrados}, PHET: ${tienePHET ? 'Sí' : 'No'}`
+                    };
+                }
+            },
+            
+            7: {
+                nombre: 'Evaluación del aprendizaje',
+                descripcion: 'Incluye indicadores claros, instrumentos (rúbricas, listas de cotejo, etc.) y criterios de logro',
+                instrumentos: ['rúbrica', 'rubrica', 'lista de cotejo', 'escala', 'matriz', 'instrumento'],
+                indicadores: ['indicador', 'criterio', 'logro', 'desempeño', 'valoración'],
+                tipos: ['formativa', 'sumativa', 'evaluación', 'evaluar', 'calificación'],
+                minimo: 2,
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let instrumentosEncontrados = 0;
+                    let indicadoresEncontrados = 0;
+                    let tiposEncontrados = 0;
+                    
+                    this.instrumentos.forEach(inst => {
+                        if (textoLower.includes(inst)) instrumentosEncontrados++;
+                    });
+                    
+                    this.indicadores.forEach(ind => {
+                        if (textoLower.includes(ind)) indicadoresEncontrados++;
+                    });
+                    
+                    this.tipos.forEach(tipo => {
+                        if (textoLower.includes(tipo)) tiposEncontrados++;
+                    });
+                    
+                    const total = instrumentosEncontrados + indicadoresEncontrados + tiposEncontrados;
+                    const tieneInstrumento = instrumentosEncontrados > 0;
+                    
+                    return {
+                        cumple: total >= this.minimo && tieneInstrumento,
+                        puntaje: total,
+                        detalles: `Instrumentos: ${instrumentosEncontrados}, Indicadores: ${indicadoresEncontrados}, Tipos: ${tiposEncontrados}`
+                    };
+                }
+            },
+            
+            8: {
+                nombre: 'Integración de TIC/PHET',
+                descripcion: 'Se evidencia de manera específica cómo y en qué momento se emplea la simulación PHET',
+                // Este criterio es MUY ESPECÍFICO: debe mencionar CÓMO se usa PHET
+                patronesIntegracion: [
+                    'mediante phet', 'usando phet', 'con phet', 'a través de phet',
+                    'simulación de', 'en la simulación', 'utilizando la simulación',
+                    'interactuar con', 'explorar en', 'manipular', 'observar en phet'
+                ],
+                momentos: ['durante', 'momento', 'fase', 'después', 'antes', 'inicio', 'desarrollo'],
+                minimo: 2,
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let integracionEncontrada = false;
+                    let momentoEspecificado = false;
+                    let conteoIntegracion = 0;
+                    
+                    // Buscar descripciones de cómo se integra PHET
+                    this.patronesIntegracion.forEach(patron => {
+                        if (textoLower.includes(patron.toLowerCase())) {
+                            integracionEncontrada = true;
+                            conteoIntegracion++;
+                        }
+                    });
+                    
+                    // Verificar si especifica momento
+                    momentoEspecificado = this.momentos.some(momento => textoLower.includes(momento));
+                    
+                    return {
+                        cumple: integracionEncontrada && momentoEspecificado,
+                        puntaje: conteoIntegracion,
+                        detalles: `Integración específica: ${integracionEncontrada ? 'Sí' : 'No'}, Momento: ${momentoEspecificado ? 'Sí' : 'No'}`
+                    };
+                }
+            },
+            
+            9: {
+                nombre: 'Atención a la diversidad',
+                descripcion: 'Contempla estrategias para estudiantes con diferentes ritmos o necesidades educativas',
+                patrones: [
+                    'diversidad', 'ritmo', 'necesidades educativas', 'nee', 'adaptación',
+                    'diferenciación', 'inclusión', 'apoyo', 'refuerzo', 'ampliación',
+                    'estudiantes con', 'velocidad de comprensión', 'diferentes niveles'
+                ],
+                minimo: 2,
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let coincidencias = 0;
+                    
+                    this.patrones.forEach(patron => {
+                        if (textoLower.includes(patron.toLowerCase())) coincidencias++;
+                    });
+                    
+                    return {
+                        cumple: coincidencias >= this.minimo,
+                        puntaje: coincidencias,
+                        detalles: `Referencias a diversidad: ${coincidencias}`
+                    };
+                }
+            },
+            
+            10: {
+                nombre: 'Reflexión docente o mejora',
+                descripcion: 'Incluye una breve autoevaluación o ajustes para futuras clases',
+                patrones: [
+                    'reflexión', 'autoevaluación', 'mejora', 'ajuste', 'modificación',
+                    'observación', 'funcionó', 'no funcionó', 'mejorar', 'próxima vez',
+                    'sugerencia', 'recomendación', 'cambiar', 'adaptar'
+                ],
+                minimo: 2,
+                validar: function(texto) {
+                    const textoLower = texto.toLowerCase();
+                    let coincidencias = 0;
+                    
+                    this.patrones.forEach(patron => {
+                        if (textoLower.includes(patron.toLowerCase())) coincidencias++;
+                    });
+                    
+                    return {
+                        cumple: coincidencias >= this.minimo,
+                        puntaje: coincidencias,
+                        detalles: `Referencias a reflexión: ${coincidencias}`
+                    };
+                }
+            }
+        };
+
+        // ========== EVENTOS DE MANEJO DE ARCHIVOS ==========
+        
+        /*
+         * Evento: Cuando el usuario selecciona un archivo con el botón
+         * Extrae el archivo y lo envía a procesar
+         */
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
+            if (file) procesarArchivo(file);
+        });
+
+        /*
+         * Evento: Permitir arrastrar archivos sobre la zona
+         * Cambia estilos visuales para indicar que se puede soltar
+         */
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-green-500', 'bg-green-50');
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-green-500', 'bg-green-50');
+        });
+
+        /*
+         * Evento: Cuando el usuario suelta un archivo en la zona
+         * Valida que sea PDF o Word y lo procesa
+         */
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-green-500', 'bg-green-50');
+            const file = e.dataTransfer.files[0];
             if (file) {
-                nombreArchivo.textContent = file.name;
-                archivoNombre.classList.remove('hidden');
-                validarPlanificacion(file);
+                const extension = file.name.split('.').pop().toLowerCase();
+                if (['pdf', 'doc', 'docx'].includes(extension)) {
+                    procesarArchivo(file);
+                } else {
+                    alert('⚠️ Por favor, suba solo archivos PDF o Word (.doc, .docx)');
+                }
             }
         });
 
-        nuevoDocumento.addEventListener('click', function() {
-            fileInput.value = '';
-            archivoNombre.classList.add('hidden');
-            resultado.classList.add('hidden');
-            infoAdicional.classList.remove('hidden');
-        });
+        // ========== FUNCIÓN PRINCIPAL: PROCESAR ARCHIVO ==========
+        
+        /*
+         * Función principal que coordina todo el proceso de validación
+         * 1. Valida tamaño del archivo
+         * 2. Muestra animación de procesamiento
+         * 3. Extrae texto del documento
+         * 4. Analiza según los 10 criterios
+         * 5. Muestra resultados
+         */
+        async function procesarArchivo(file) {
+            // Validar tamaño máximo (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('⚠️ El archivo es muy grande. Por favor, suba un archivo menor a 10MB.');
+                return;
+            }
 
-        async function validarPlanificacion(file) {
-            // Ocultar info adicional
-            infoAdicional.classList.add('hidden');
-            resultado.classList.add('hidden');
+            // Mostrar nombre del archivo
+            document.getElementById('nombreArchivo').textContent = file.name;
+            document.getElementById('archivoNombre').classList.remove('hidden');
             
-            // Mostrar procesando
-            procesando.classList.remove('hidden');
+            // Mostrar animación de procesamiento
+            document.getElementById('procesando').classList.remove('hidden');
             
-            // Simular análisis
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            try {
+                // PASO 1: Extraer texto del documento
+                const texto = await extraerTexto(file);
+                
+                // Validar que se extrajo contenido suficiente
+                if (!texto || texto.length < 50) {
+                    throw new Error('El documento está vacío o no se pudo leer correctamente. Asegúrese de que contenga texto legible.');
+                }
+
+                // PASO 2: Simular tiempo de procesamiento (mejora UX)
+                await new Promise(resolve => setTimeout(resolve, 2500));
+
+                // PASO 3: Analizar documento según criterios
+                const analisis = analizarDocumento(texto);
+
+                // PASO 4: Ocultar procesamiento y mostrar resultados
+                document.getElementById('procesando').classList.add('hidden');
+                mostrarResultado(analisis);
+
+            } catch (error) {
+                console.error('Error al procesar:', error);
+                document.getElementById('procesando').classList.add('hidden');
+                alert('❌ Error al procesar el archivo:\n\n' + error.message + '\n\nVerifique que el documento sea un PDF o Word válido con texto legible (no imágenes escaneadas).');
+                reiniciar();
+            }
+        }
+
+        // ========== EXTRACCIÓN DE TEXTO ==========
+        
+        /*
+         * Determina el tipo de archivo y llama a la función apropiada
+         * Soporta: PDF, DOC, DOCX
+         */
+        async function extraerTexto(file) {
+            const extension = file.name.split('.').pop().toLowerCase();
             
-            // Ocultar procesando
-            procesando.classList.add('hidden');
+            if (extension === 'pdf') {
+                return await extraerTextoPDF(file);
+            } else if (extension === 'docx' || extension === 'doc') {
+                return await extraerTextoWord(file);
+            }
+            throw new Error('Formato no soportado. Use PDF o Word.');
+        }
+
+        /*
+         * Extrae texto de archivos PDF
+         * Usa la librería PDF.js para leer el contenido
+         * Procesa página por página y concatena todo el texto
+         */
+        async function extraerTextoPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+            let textoCompleto = '';
             
-            // Generar resultado aleatorio
-            const aleatorio = Math.random();
+            // Procesar cada página del PDF
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                textoCompleto += pageText + '\n';
+            }
             
-            if (aleatorio > 0.4) {
-                mostrarAprobado();
+            return textoCompleto;
+        }
+
+        /*
+         * Extrae texto de archivos Word (.doc, .docx)
+         * Usa la librería Mammoth para leer el contenido
+         */
+        async function extraerTextoWord(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({arrayBuffer});
+            return result.value;
+        }
+
+        // ========== FUNCIÓN DE ANÁLISIS PRINCIPAL ==========
+        
+        /*
+         * Analiza el texto completo del documento según los 10 criterios
+         * Retorna un objeto con:
+         * - puntaje: Número total de criterios cumplidos (0-10)
+         * - nivel: Clasificación (Excelente, Muy buena, etc.)
+         * - criterios: Array con detalles de cada criterio
+         * - recomendaciones: Sugerencias para mejorar
+         */
+        function analizarDocumento(texto) {
+            let puntajeTotal = 0;
+            const criteriosResultado = [];
+            const recomendaciones = [];
+
+            // Analizar cada uno de los 10 criterios
+            for (let i = 1; i <= 10; i++) {
+                const criterio = CRITERIOS[i];
+                
+                // Ejecutar la función de validación específica del criterio
+                const resultado = criterio.validar(texto);
+                
+                // Si cumple el criterio, sumar al puntaje
+                if (resultado.cumple) {
+                    puntajeTotal++;
+                }
+
+                // Guardar resultado del criterio
+                criteriosResultado.push({
+                    numero: i,
+                    nombre: criterio.nombre,
+                    descripcion: criterio.descripcion,
+                    cumple: resultado.cumple,
+                    detalles: resultado.detalles,
+                    puntaje: resultado.puntaje
+                });
+
+                // Si no cumple, generar recomendación
+                if (!resultado.cumple) {
+                    recomendaciones.push(generarRecomendacion(i, criterio.nombre));
+                }
+            }
+
+            // Determinar nivel según puntaje obtenido
+            let nivel;
+            if (puntajeTotal === 10) {
+                nivel = 'Excelente';
+            } else if (puntajeTotal >= 8) {
+                nivel = 'Muy buena';
+            } else if (puntajeTotal >= 6) {
+                nivel = 'Aceptable';
+            } else if (puntajeTotal >= 4) {
+                nivel = 'Insuficiente';
             } else {
-                mostrarMejoras();
+                nivel = 'Deficiente';
             }
-            
-            resultado.classList.remove('hidden');
+
+            return {
+                puntaje: puntajeTotal,
+                nivel: nivel,
+                criterios: criteriosResultado,
+                recomendaciones: recomendaciones
+            };
         }
 
-        function mostrarAprobado() {
-            resultado.className = 'rounded-lg shadow-lg p-8 bg-green-50 border-2 border-green-300';
+        // ========== GENERACIÓN DE RECOMENDACIONES ==========
+        
+        /*
+         * Genera recomendaciones específicas para cada criterio no cumplido
+         * Basadas en las directrices mostradas en las imágenes
+         */
+        function generarRecomendacion(criterioNum, nombreCriterio) {
+            const recomendaciones = {
+                1: 'Complete los datos generales: incluya nombre de la institución educativa, área (Ciencias Naturales), grado específico (ej: 8° de Educación Básica), fecha completa (día/mes/año), nombre del docente y título claro de la unidad o tema (ej: "Ley de Conservación de la Energía").',
+                
+                2: 'Redacte objetivos de aprendizaje claros usando verbos en infinitivo como: identificar, analizar, explicar, describir, comparar, demostrar. Ejemplo: "Describir cómo la energía se transforma y conserva en diferentes sistemas físicos mediante la observación y análisis de simulaciones interactivas en PHET".',
+                
+                3: 'Especifique la competencia o destreza del currículo nacional de Ciencias Naturales. Ejemplo: "Reconoce las transformaciones de energía que ocurren en los sistemas naturales y tecnológicos (E.CN.5.3)". Refiérase al documento curricular oficial.',
+                
+                4: 'Describa estrategias metodológicas activas que integren PHET. Debe mencionar: a) El nombre específico de la simulación (ej: "Energy Skate Park"), b) La metodología (aprendizaje activo, indagación guiada, experimentación), c) Cómo los estudiantes interactuarán con la simulación.',
+                
+                5: 'Desarrolle una secuencia didáctica completa con tres momentos: INICIO (activación de conocimientos previos mediante preguntas o video introductorio, 10-15 min), DESARROLLO (uso de la simulación PHET para experimentar, mediciones y trabajo colaborativo, 25-30 min), CIERRE (reflexión guiada sobre cómo se conserva la energía, conclusiones y presentación oral, 10-15 min). Especifique tiempos aproximados.',
+                
+                6: 'Liste todos los recursos necesarios: a) Digitales: computadores con acceso a internet, simulación PHET específica (indique cuál), proyector; b) Físicos: cuaderno de apuntes, guía de observación impresa, pizarra digital; c) Materiales de apoyo: fichas de trabajo con preguntas guía.',
+                
+                7: 'Diseñe instrumentos de evaluación concretos: a) Rúbrica de desempeño con criterios específicos (identifica tipos de energía: 1-5 puntos, explica conservación de energía: 1-5 puntos, participa en trabajo colaborativo: 1-5 puntos), b) Lista de cotejo para verificar cumplimiento de tareas, c) Indicadores claros de logro.',
+                
+                8: 'Demuestre explícitamente cómo integrará PHET: Indique el momento exacto ("Durante el desarrollo, se utilizará la simulación PHET Energy Skate Park para observar y medir la energía potencial que se convierte en cinética"), la actividad específica que realizarán los estudiantes ("Los estudiantes manipularán la altura de la rampa y registrarán mediciones") y cómo se relaciona con el objetivo.',
+                
+                9: 'Contemple la atención a la diversidad: a) Para estudiantes con menor velocidad de comprensión, proporcione una versión de la guía con imágenes y pasos más detallados; b) Para estudiantes avanzados, incluya una tabla comparativa adicional con casos más complejos; c) Ofrezca apoyos visuales, más tiempo si es necesario, o actividades diferenciadas.',
+                
+                10: 'Incluya una sección de reflexión docente breve: "El uso de PHET favoreció la participación activa de los estudiantes. Para futuras sesiones, se sugiere: a) Reforzar la interpretación de gráficos de energía, b) Ampliar el tiempo de experimentación libre, c) Incluir ejemplos de la vida cotidiana para conectar mejor con la realidad de los estudiantes".'
+            };
             
-            const icono = document.getElementById('iconoResultado');
-            icono.className = 'w-16 h-16 text-green-600';
-            
-            document.getElementById('mensajeResultado').textContent = '¡Excelente! Su planificación cumple con todos los requisitos';
-            document.getElementById('mensajeResultado').className = 'text-2xl font-bold text-green-900';
-            
-            document.getElementById('puntaje').textContent = '95';
-            
-            const detalles = [
-                '✓ Objetivos de aprendizaje claramente definidos',
-                '✓ Estrategias metodológicas apropiadas',
-                '✓ Contenidos alineados al currículo',
-                '✓ Evaluación formativa y sumativa incluida',
-                '✓ Recursos del laboratorio virtual especificados'
-            ];
-            
-            mostrarDetalles(detalles);
-            document.getElementById('recomendaciones').classList.add('hidden');
+            return recomendaciones[criterioNum] || `Complete adecuadamente el criterio: ${nombreCriterio}`;
         }
 
-        function mostrarMejoras() {
-            resultado.className = 'rounded-lg shadow-lg p-8 bg-yellow-50 border-2 border-yellow-300';
+        // ========== MOSTRAR RESULTADOS ==========
+        
+        /*
+         * Muestra los resultados del análisis en la interfaz
+         * Aplica estilos según el nivel obtenido
+         * Genera visualización de criterios y recomendaciones
+         */
+        function mostrarResultado(analisis) {
+            const { puntaje, nivel, criterios, recomendaciones } = analisis;
             
-            const icono = document.getElementById('iconoResultado');
-            icono.className = 'w-16 h-16 text-yellow-600';
-            icono.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>';
-            
-            document.getElementById('mensajeResultado').textContent = 'Su planificación necesita mejoras';
-            document.getElementById('mensajeResultado').className = 'text-2xl font-bold text-yellow-900';
-            
-            const puntaje = Math.floor(Math.random() * 30) + 50;
+            // Mostrar puntaje
             document.getElementById('puntaje').textContent = puntaje;
             
-            const detalles = [
-                '✓ Objetivos de aprendizaje presentes',
-                '✗ Falta especificar estrategias metodológicas',
-                '✓ Contenidos incluidos',
-                '✗ Evaluación incompleta (falta rúbrica)',
-                '✗ No se mencionan recursos del laboratorio virtual'
-            ];
+            // Definir estilos y mensajes según el nivel
+            const estilos = {
+                'Excelente': {
+                    fondo: 'bg-green-50',
+                    borde: 'border-green-300',
+                    icono: 'text-green-600',
+                    badge: 'bg-green-100 text-green-800',
+                    mensaje: '🎉 ¡Excelente trabajo docente! Su planificación cumple con todos los criterios de innovación pedagógica y la integración del programa PHET',
+                    interpretacion: 'Planificación integral, innovadora y bien estructurada. Cumple con todos los criterios establecidos.'
+                },
+                'Muy buena': {
+                    fondo: 'bg-blue-50',
+                    borde: 'border-blue-300',
+                    icono: 'text-blue-600',
+                    badge: 'bg-blue-100 text-blue-800',
+                    mensaje: '⭐ Su planificación está casi lista. Revise los apartados de evaluación, estrategias o uso del programa PHET para mejorarla',
+                    interpretacion: 'Cumple la mayoría de los criterios con coherencia. Planificación funcional, pero requiere revisar algunos apartados.'
+                },
+                'Aceptable': {
+                    fondo: 'bg-yellow-50',
+                    borde: 'border-yellow-300',
+                    icono: 'text-yellow-600',
+                    badge: 'bg-yellow-100 text-yellow-800',
+                    mensaje: '✅ Su planificación es funcional pero necesita mejoras importantes',
+                    interpretacion: 'Planificación funcional, pero requiere mejoras. Revise objetivos, recursos y especialmente la integración del programa PHET.'
+                },
+                'Insuficiente': {
+                    fondo: 'bg-orange-50',
+                    borde: 'border-orange-300',
+                    icono: 'text-orange-600',
+                    badge: 'bg-orange-100 text-orange-800',
+                    mensaje: '⚠️ La planificación presenta varias deficiencias importantes',
+                    interpretacion: 'Varias secciones incompletas o incoherentes. Es necesario revisar y completar elementos fundamentales antes de implementarla.'
+                },
+                'Deficiente': {
+                    fondo: 'bg-red-50',
+                    borde: 'border-red-300',
+                    icono: 'text-red-600',
+                    badge: 'bg-red-100 text-red-800',
+                    mensaje: '❌ La planificación no cumple con los criterios mínimos establecidos',
+                    interpretacion: 'La planificación no cumple con los criterios mínimos. Por favor, revise objetivos, recursos y evaluación antes de reenviar.'
+                }
+            };
             
-            const recomendaciones = [
-                'Agregue estrategias específicas como: experimentación, indagación guiada, aprendizaje colaborativo',
-                'Incluya instrumentos de evaluación (rúbricas, listas de cotejo)',
-                'Especifique qué simulaciones del laboratorio virtual utilizará'
-            ];
+            const estilo = estilos[nivel];
             
-            mostrarDetalles(detalles);
-            mostrarRecomendaciones(recomendaciones);
+            // Aplicar estilos al contenedor principal
+            const resultado = document.getElementById('resultado');
+            resultado.className = `rounded-xl shadow-2xl p-6 md:p-8 ${estilo.fondo} border-2 ${estilo.borde}`;
+            
+            // Actualizar ícono y mensaje
+            document.getElementById('iconoResultado').className = `w-24 h-24 flex-shrink-0 ${estilo.icono}`;
+            document.getElementById('mensajeResultado').textContent = estilo.mensaje;
+            document.getElementById('mensajeResultado').className = `text-3xl font-bold ${estilo.icono}`;
+            
+            // Actualizar badge de nivel
+            document.getElementById('nivelBadge').textContent = `Nivel: ${nivel}`;
+            document.getElementById('nivelBadge').className = `inline-block px-4 py-2 rounded-full text-sm font-semibold ${estilo.badge}`;
+            
+            // Actualizar interpretación
+            document.getElementById('interpretacion').textContent = estilo.interpretacion;
+            document.getElementById('interpretacionBox').className = `bg-white rounded-xl p-6 mb-6 border-l-4 ${estilo.borde}`;
+            
+            // Generar HTML para los detalles de criterios
+            const detallesHTML = criterios.map(c => {
+                const iconoCheck = c.cumple 
+                    ? '<svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>'
+                    : '<svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                
+                return `
+                    <div class="flex gap-3 p-4 rounded-lg ${c.cumple ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
+                        ${iconoCheck}
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-800 mb-1">
+                                ${c.cumple ? '✅' : '❌'} ${c.numero}. ${c.nombre}
+                            </p>
+                            <p class="text-sm text-gray-600 mb-1">${c.descripcion}</p>
+                            <p class="text-xs ${c.cumple ? 'text-green-700' : 'text-red-700'} font-medium">
+                                ${c.detalles}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('detalles').innerHTML = detallesHTML;
+            
+            // Mostrar recomendaciones
+            if (recomendaciones.length > 0) {
+                const recsHTML = recomendaciones.map((rec, i) => `
+                    <li class="flex gap-3 items-start">
+                        <span class="flex-shrink-0 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center font-bold text-sm">${i+1}</span>
+                        <span class="text-gray-800 text-sm">${rec}</span>
+                    </li>
+                `).join('');
+                
+                document.getElementById('listaRecomendaciones').innerHTML = recsHTML;
+            } else {
+                // Si no hay recomendaciones (puntaje perfecto)
+                document.getElementById('recomendaciones').innerHTML = `
+                    <div class="text-center py-8">
+                        <svg class="w-16 h-16 text-green-500 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <p class="text-xl font-bold text-green-800">¡Perfecta!</p>
+                        <p class="text-gray-600">Su planificación cumple con todos los criterios establecidos</p>
+                    </div>
+                `;
+            }
+            
+            // Mostrar el contenedor de resultados y hacer scroll
+            resultado.classList.remove('hidden');
+            window.scrollTo({ top: resultado.offsetTop - 100, behavior: 'smooth' });
         }
 
-        function mostrarDetalles(detalles) {
-            const lista = document.getElementById('detalles');
-            lista.innerHTML = '';
-            detalles.forEach(detalle => {
-                const li = document.createElement('li');
-                li.className = 'text-gray-700';
-                li.textContent = detalle;
-                lista.appendChild(li);
-            });
-        }
-
-        function mostrarRecomendaciones(recomendaciones) {
-            const contenedor = document.getElementById('recomendaciones');
-            const lista = document.getElementById('listaRecomendaciones');
-            lista.innerHTML = '';
-            
-            recomendaciones.forEach(rec => {
-                const li = document.createElement('li');
-                li.className = 'text-gray-700 flex gap-2';
-                li.innerHTML = `<span class="text-yellow-600 font-bold">→</span><span>${rec}</span>`;
-                lista.appendChild(li);
-            });
-            
-            contenedor.classList.remove('hidden');
+        // ========== REINICIAR APLICACIÓN ==========
+        
+        /*
+         * Limpia todos los campos y oculta resultados
+         * Permite validar otra planificación
+         */
+        function reiniciar() {
+            fileInput.value = '';
+            document.getElementById('archivoNombre').classList.add('hidden');
+            document.getElementById('resultado').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 </body>
